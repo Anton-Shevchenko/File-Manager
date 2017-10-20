@@ -379,6 +379,25 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
         			var sort_direction = 1;
         			console.log(dec);
 
+        			function trAp(tr, v, ko, lev=1) {
+        				if (ko == "ajax") {
+        					tr.append([$('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(lev + v.name)),]);
+        				}
+        				else {
+        					tr.append([$('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(v.name)),]);
+        				}
+        				tr.append([
+		                    $('<td/>').append($("<form/>").attr("method", 'POST').append($("<input/>").attr("type", 'submit').attr("value","Удалить").attr("name","delet")).append($("<input/>").attr("type", 'hidden').attr("name", "delete_file").attr("value", v.href))),
+		                    $('<td/>').append($("<form/>").attr("method", "POST").append($('<a/>').attr("href", v.href).attr("name", "access")).append($("<input/>").attr("type", "submit").attr("value",v.mods).attr("name","access")).append($("<input/>").attr("type", 'hidden').attr("name", "name_access").attr("value", v.href))),
+		                    $('<td/>').text(v.size),
+		                    $('<td/>').text(v.date),   
+		                ]);
+		                if(v.is_dir == true){
+	                        tr.addClass('ajax');
+	                        tr.attr('path', v.href);
+		                }
+        			}
+
         			function draw_table(obj){
 			            var t = $('table.main tbody');
 
@@ -386,30 +405,13 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 			            $(obj).each(function(k, v){
 
 			            	var base_length = v.href.split('/').length;
-				                        var fix_url = document.location.pathname.split('/').length + 2;
-				                        if (document.location.pathname == '/')
-				                            var fix_url = 3;
+	                        var fix_url = document.location.pathname.split('/').length + 2;
+	                        if (document.location.pathname == '/')
+	                            var fix_url = 3;
 
 				                        var level = base_length - fix_url ;
 			                var tr = $('<tr/>').attr('level', level + 2);
-			                tr.append([
-			                    $('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(v.name)),
-			                    /*$('<td/>').append($("<button/>").append($('<a/>')).attr("href", v.href).text(v.delet)),
-			                    $('<td/>').append($("<button/>").text(v.mods)),*/
-
-
-			                    $('<td/>').append($("<form/>").attr("method", 'POST').append($("<input/>").attr("type", 'submit').attr("value","Удалить").attr("name","delet")).append($("<input/>").attr("type", 'hidden').attr("name", "delete_file").attr("value", v.href))),
-			                    $('<td/>').append($("<form/>").attr("method", "POST").append($('<a/>').attr("href", v.href).attr("name", "access")).append($("<input/>").attr("type", "submit").attr("value",v.mods).attr("name","access")).append($("<input/>").attr("type", 'hidden').attr("name", "name_access").attr("value", v.href))),
-			                    $('<td/>').text(v.size),
-			                    $('<td/>').text(v.date),
-			                    
-			                    
-			                ]);
-			                if(v.is_dir == true){
-
-			                        tr.addClass('ajax');
-			                        tr.attr('path', v.href);
-			                }
+			                trAp(tr, v, "a");
 
 			                t.append(tr);
 			            });
@@ -432,9 +434,6 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 			            return false;
 			        });
 
-
-
-
 			        $("body").on("click", ".ajax, .-ajax", function(){
 				        if ($(this).hasClass("-ajax")){
 				            // console.log($(this).next);
@@ -446,7 +445,6 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 				            	if (levv >= lev ) {
 				            		$(this).remove();
 				            	}
-
 				            });
 				            $(this).removeClass("-ajax").addClass('ajax');
 				        }
@@ -474,38 +472,14 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 				                            level_sign += ".";
 				                        }
 				                        var tr = $('<tr/>').attr('level', level + 1);
-				                        tr.append([
-				                            $('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(level_sign + v.name)),
-						                    /*$('<td/>').append($("<button/>").append($('<a/>')).attr("href", v.href).text(v.delet)),
-						                    $('<td/>').append($("<button/>").text(v.mods)),*/
-
-
-						                    $('<td/>').append($("<form/>").attr("method", 'POST').append($("<input/>").attr("type", 'submit').attr("value","Удалить").attr("name","delet")).append($("<input/>").attr("type", 'hidden').attr("name", "delete_file").attr("value", v.href))),
-						                    $('<td/>').append($("<form/>").attr("method", "POST").append($('<a/>').attr("href", v.href).attr("name", "access")).append($("<input/>").attr("type", "submit").attr("value",v.mods).attr("name","access")).append($("<input/>").attr("type", 'hidden').attr("name", "name_access").attr("value", v.href))),
-						                    $('<td/>').text(v.size),
-						                    $('<td/>').text(v.date),
-				                        ]);
-				                        if(v.is_dir == true){
-				                            tr.addClass('ajax');
-				                            tr.attr('path', v.href);
-				                        }
-				//                        nextUntil
+				                      	trAp(tr, v, "ajax", level_sign);
 				                        $(tr).insertAfter(that);
 				                    });
-
 				                    $(that).removeClass("ajax").addClass('-ajax');
 				                }
 				            });
 				        }
-
-
-
 				    });
-				    
-
-
-
-	
 				</script>
 				<form enctype="multipart/form-data"  method="POST">
 			    	<input type="hidden" name="MAX_FILE_SIZE" value="30000" />
@@ -527,8 +501,7 @@ elseif (is_file($base_path)){
 	}
 	else {
 
-		$content = htmlspecialchars(file_get_contents($_SERVER["REQUEST_URI"]));
-		// $content = file_get_contents($base_path);
+		$content = htmlspecialchars(file_get_contents($base_path));
 		$old_name = $_SERVER["REQUEST_URI"];
 		$old_name = explode('/', $old_name);
 		$old_name = $old_name[sizeof($old_name) - 1];
