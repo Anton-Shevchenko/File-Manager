@@ -68,8 +68,6 @@ if (is_dir($base_path)) {
 		array_push($base_array, $aa);
 	}
 }
-// header('Content-Type: application/json');
-// $json_array = json_encode($base_array);
 
 ?>
 
@@ -265,7 +263,6 @@ $sort_direction == 'DESC' ? $sort_direction = 'ASC' : $sort_direction = 'DESC';
 <body>
 <?php
 $base = './uploads';
-// $base_path = $base . $_SERVER['REQUEST_URI'];
 
 // делаем путь через УРЛ к обьекту
 $URI = $_SERVER["REQUEST_URI"];
@@ -374,18 +371,29 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 				</table>
 
 				<script type="text/javascript">
-					var enc = '<?= $parseToJS?>';
+					var enc = '<?= $parseToJS ?>';
         			var dec = $.parseJSON(enc); //получили кучу объектов с 3 ключами и значениями
         			var sort_direction = 1;
         			console.log(dec);
 
-        			function trAp(tr, v, ko, lev=1) {
-        				if (ko == "ajax") {
-        					tr.append([$('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(lev + v.name)),]);
+        			function trAp(dir ,tr, v, ko, lev=1) {
+        				if (dir) {
+        					if (ko == "ajax") {
+        						tr.append([$('<td/>').text(lev + v.name),]);
+	        				}
+	        				else {
+	        					tr.append([$('<td/>').text(v.name),]);
+	        				}
         				}
         				else {
-        					tr.append([$('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(v.name)),]);
+        					if (ko == "ajax") {
+        					tr.append([$('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(lev + v.name)),]);
+	        				}
+	        				else {
+	        					tr.append([$('<td/>').append($("<a/>").attr("href", v.href.replace('./uploads/', '/')).text(v.name)),]);
+	        				}
         				}
+        				
         				tr.append([
 		                    $('<td/>').append($("<form/>").attr("method", 'POST').append($("<input/>").attr("type", 'submit').attr("value","Удалить").attr("name","delet")).append($("<input/>").attr("type", 'hidden').attr("name", "delete_file").attr("value", v.href))),
 		                    $('<td/>').append($("<form/>").attr("method", "POST").append($('<a/>').attr("href", v.href).attr("name", "access")).append($("<input/>").attr("type", "submit").attr("value",v.mods).attr("name","access")).append($("<input/>").attr("type", 'hidden').attr("name", "name_access").attr("value", v.href))),
@@ -409,9 +417,9 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 	                        if (document.location.pathname == '/')
 	                            var fix_url = 3;
 
-				                        var level = base_length - fix_url ;
+				            var level = base_length - fix_url ;
 			                var tr = $('<tr/>').attr('level', level + 2);
-			                trAp(tr, v, "a");
+			                trAp(v.is_dir, tr, v, "a");
 
 			                t.append(tr);
 			            });
@@ -419,7 +427,6 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 			        draw_table(dec);
 
 			        $('input[data-field]').on("click", function(e){
-			        	// e.preventDefault();
 			            var sort_field = $(this).data("field");
 			            dec.sort(function(a, b){
 			                if ($.isNumeric(a[sort_field])){
@@ -436,7 +443,6 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 
 			        $("body").on("click", ".ajax, .-ajax", function(){
 				        if ($(this).hasClass("-ajax")){
-				            // console.log($(this).next);
 				            var lev = $(this).attr('level');
 				            var atrl = '[level='+ lev +']';
 				            $(this).nextUntil(atrl).each(function(){
@@ -472,7 +478,7 @@ $path = $base . $implodedUri; // это истинный путь к обьек�
 				                            level_sign += ".";
 				                        }
 				                        var tr = $('<tr/>').attr('level', level + 1);
-				                      	trAp(tr, v, "ajax", level_sign);
+				                      	trAp(v.is_dir, tr, v, "ajax", level_sign);
 				                        $(tr).insertAfter(that);
 				                    });
 				                    $(that).removeClass("ajax").addClass('-ajax');
